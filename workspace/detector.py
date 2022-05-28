@@ -2,6 +2,7 @@ import os
 import cv2
 import numpy as np
 import tensorflow as tf
+from typing import Tuple
 from cfg.global_cfg import MODEL_PATH, THRESHOLD, logger
 
 
@@ -19,7 +20,7 @@ class Detector:
         self.model = tf.saved_model.load(os.path.join(MODEL_PATH, self.model_name, 'saved_model'))
         logger.info(f'Model {self.model_name} is loaded successfully')
 
-    def create_bounding_box(self, image: cv2.imread, threshold: float = THRESHOLD) -> np.ndarray:
+    def create_bounding_box(self, image: cv2.imread, threshold: float = THRESHOLD) -> Tuple[np.ndarray, list]:
         """
         function to create bounding box for analyzing image where face detection system was found faces
         :param image: image for analyze by face-detection-system
@@ -33,11 +34,13 @@ class Detector:
         class_scores = detections['detection_scores'][0].numpy()
         bbox_ids = tf.image.non_max_suppression(
             bboxes, class_scores, max_output_size=50, iou_threshold=threshold, score_threshold=threshold)
+        confidence = []
         if len(bbox_ids) != 0:
             for i in bbox_ids:
+                confidence.append(round(100 * class_scores[i]))
                 display_text = '{}: {}%'.format('FACE', round(100 * class_scores[i]))
                 self.build_rectangle(image=image, bbox=bboxes[i], display_text=display_text)
-        return image
+        return image, confidence
 
     @staticmethod
     def build_rectangle(image, bbox, display_text):
@@ -63,5 +66,6 @@ class Detector:
         :return: np.ndarray object with drawn bounding box
         """
         image = cv2.imread(filename=image_path)
-        bbox_image = self.create_bounding_box(image=image, threshold=threshold)
+        bbox_image, confidences = self.create_bounding_box(image=image, threshold=threshold)
+        logger.info(f'Faces detected: {len(confidences)}, Values: {confidences}')
         return bbox_image
