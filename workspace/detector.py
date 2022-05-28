@@ -31,18 +31,28 @@ class Detector:
             cv2.cvtColor(image.copy(), cv2.COLOR_BGR2RGB), dtype=tf.uint8)[tf.newaxis, ...])
         bboxes = detections['detection_boxes'][0].numpy()
         class_scores = detections['detection_scores'][0].numpy()
-        height, width, color = image.shape
         bbox_ids = tf.image.non_max_suppression(
             bboxes, class_scores, max_output_size=50, iou_threshold=threshold, score_threshold=threshold)
         if len(bbox_ids) != 0:
             for i in bbox_ids:
                 display_text = '{}: {}%'.format('FACE', round(100 * class_scores[i]))
-                y_min, x_min, y_max, x_max = tuple(bboxes[i].tolist())
-                x_min, x_max, y_min, y_max = int(x_min * width), int(x_max * width), \
-                                             int(y_min * height), int(y_max * height)
-                cv2.rectangle(image, (x_min, y_min), (x_max, y_max), color=(255, 0, 0), thickness=1)
-                cv2.putText(image, display_text, (x_min, y_min - 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 0, 0), 2)
+                self.build_rectangle(image=image, bbox=bboxes[i], display_text=display_text)
         return image
+
+    @staticmethod
+    def build_rectangle(image, bbox, display_text):
+        """
+        function to draw rectangle and display text and put it on the image
+        :param image: image for detecting face
+        :param bbox: coordinates for detection rectangle
+        :param display_text: text with confidence
+        """
+        height, width, color = image.shape
+        y_min, x_min, y_max, x_max = tuple(bbox.tolist())
+        x_min, x_max, y_min, y_max = int(x_min * width), int(x_max * width), \
+                                     int(y_min * height), int(y_max * height)
+        cv2.rectangle(image, (x_min, y_min), (x_max, y_max), color=(255, 0, 0), thickness=1)
+        cv2.putText(image, display_text, (x_min, y_min - 10), cv2.FONT_HERSHEY_PLAIN, 1, (255, 0, 0), 2)
 
     def predict_image(self, image_path: str, threshold: float = 0.5) -> np.ndarray:
         """
