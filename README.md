@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Python Version: 3.8.10+. More information haw to install Python for your operating system: https://www.python.org/downloads
+- Python Version: 3.8.10+. More information how to install Python for your operating system: https://www.python.org/downloads
 
 ### Create virtual environment
 
