@@ -2,8 +2,7 @@
 
 ## Prerequisites
 
-- Operating System: Linux (Ubuntu 20.04)
-- Python Version: 3.8.10
+- Python Version: 3.8.10+. More information haw to install Python for your operating system: https://www.python.org/downloads
 
 ### Create virtual environment
 
